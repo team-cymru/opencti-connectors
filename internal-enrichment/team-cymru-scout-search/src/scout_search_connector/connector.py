@@ -226,7 +226,7 @@ class ScoutSearchConnectorConnector:
                 "[ScoutSearchConnector] Enrichment message received", data
             )
             entity_id = opencti_entity["standard_id"]
-            observable_type = opencti_entity["entity_type"]
+            entity_type = opencti_entity["entity_type"]
             pattern = opencti_entity["pattern"]
             pattern_type = opencti_entity["pattern_type"]
 
@@ -234,22 +234,21 @@ class ScoutSearchConnectorConnector:
                 "[ScoutSearchConnector] Processing enrichment request",
                 {
                     "entity_id": entity_id,
-                    "observable_type": observable_type,
+                    "entity_type": entity_type,
                     "pattern": pattern,
                     "pattern_type": pattern_type,
                 },
             )
 
-            # Check if observable type is in scope
-            if observable_type not in ["Indicator"]:
+            # Check if entity type is in scope
+            if entity_type != "Indicator":
                 self.helper.connector_logger.warning(
-                    "[ScoutSearchConnector] Observable type not in scope, returning original entity",
-                    {"observable_type": observable_type},
+                    "[ScoutSearchConnector] Entity type not in scope",
+                    {"entity_type": entity_type},
                 )
                 if not data.get("event_type"):
-                    # If it is not in scope AND entity bundle passed through playbook, we should return the original bundle unchanged
                     return self.send_bundle(data["stix_objects"])
-                return "Observable type not in connector scope"
+                return "Entity type not in connector scope"
 
             if pattern_type != self.client.config.pattern_type:
                 self.helper.connector_logger.warning(
@@ -261,9 +260,9 @@ class ScoutSearchConnectorConnector:
                 )
                 return "Unsupported pattern type"
 
-            intelligence_data = self.client.get_entity(observable_type, pattern)
+            intelligence_data = self.client.get_entity(pattern)
 
-            if not intelligence_data:
+            if not intelligence_data or not intelligence_data.get("objects"):
                 self.helper.connector_logger.info(
                     "[ScoutSearchConnector] No intelligence data found",
                     {"pattern": pattern},
