@@ -192,8 +192,8 @@ class ScoutSearchConnectorConnector:
         if source_type == "network-traffic" or target_type == "network-traffic":
             return False
 
-        # Skip redundant domain-to-domain relationships
-        if source_type == target_type == "domain-name" and source_ref == target_ref:
+        # Skip self-referencing relationships
+        if source_ref == target_ref:
             return False
 
         # Skip irrelevant relationship types
