@@ -123,7 +123,10 @@ class ScoutSearchConnectorConnector:
                     "identity",
                     "x509-certificate",
                 ]:
-                    # Create a relationship between the text and this object
+                    # Skip self-referencing relationships
+                    if obj.get("id") == original_entity_id:
+                        continue
+                    # Create a relationship between the Indicator and this object
                     now = datetime.now(timezone.utc)
                     relationship_id = StixCoreRelationship.generate_id(
                         "related-to", original_entity_id, obj.get("id")
