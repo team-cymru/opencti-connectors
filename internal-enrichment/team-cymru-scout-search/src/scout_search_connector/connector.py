@@ -141,25 +141,9 @@ class ScoutSearchConnectorConnector:
                         "modified": now.isoformat().replace("+00:00", "Z"),
                         "created_by_ref": self.team_cymru_identity["id"],
                     }
-                    self.helper.connector_logger.debug(
-                        "[ScoutSearchConnector] Creating related-to relationship",
-                        {
-                            "source": original_entity_id,
-                            "target": obj.get("id"),
-                            "target_type": obj.get("type"),
-                            "relationship_id": relationship_id,
-                        },
-                    )
                     new_relationships.append(relationship)
 
             # Add all relationships at once after the loop
-            self.helper.connector_logger.info(
-                "[ScoutSearchConnector] New related-to relationships created",
-                {
-                    "count": len(new_relationships),
-                    "original_entity_id": original_entity_id,
-                },
-            )
             filtered_objects.extend(new_relationships)
 
             # Add author identity to the bundle
@@ -231,9 +215,7 @@ class ScoutSearchConnectorConnector:
     def send_bundle(self, stix_objects: list) -> str:
         stix_objects_bundle = self.helper.stix2_create_bundle(stix_objects)
         bundles_sent = self.helper.send_stix2_bundle(
-            bundle=stix_objects_bundle,
-            update=True,
-            cleanup_inconsistent_bundle=True,
+            stix_objects_bundle, cleanup_inconsistent_bundle=True
         )
         return f"Sending {len(bundles_sent)} stix bundle(s) for worker import"
 
