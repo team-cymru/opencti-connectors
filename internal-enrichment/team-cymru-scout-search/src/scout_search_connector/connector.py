@@ -231,7 +231,9 @@ class ScoutSearchConnectorConnector:
     def send_bundle(self, stix_objects: list) -> str:
         stix_objects_bundle = self.helper.stix2_create_bundle(stix_objects)
         bundles_sent = self.helper.send_stix2_bundle(
-            stix_objects_bundle, cleanup_inconsistent_bundle=True
+            bundle=stix_objects_bundle,
+            update=True,
+            cleanup_inconsistent_bundle=True,
         )
         return f"Sending {len(bundles_sent)} stix bundle(s) for worker import"
 
