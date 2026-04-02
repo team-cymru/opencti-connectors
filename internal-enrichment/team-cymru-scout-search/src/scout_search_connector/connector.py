@@ -149,27 +149,6 @@ class ScoutSearchConnectorConnector:
             # Add author identity to the bundle
             filtered_objects.append(self.team_cymru_identity)
 
-            # Log object type counts for debugging
-            type_counts = {}
-            rel_type_counts = {}
-            for obj in filtered_objects:
-                obj_type = obj.get("type", "unknown")
-                type_counts[obj_type] = type_counts.get(obj_type, 0) + 1
-                if obj_type == "relationship":
-                    src = obj.get("source_ref", "").split("--")[0]
-                    tgt = obj.get("target_ref", "").split("--")[0]
-                    rel = obj.get("relationship_type", "unknown")
-                    key = f"{src} -> {tgt} [{rel}]"
-                    rel_type_counts[key] = rel_type_counts.get(key, 0) + 1
-            self.helper.connector_logger.info(
-                "[ScoutSearchConnector] Bundle object type counts",
-                {"counts": type_counts, "new_relationships": len(new_relationships)},
-            )
-            self.helper.connector_logger.info(
-                "[ScoutSearchConnector] Relationship type breakdown",
-                {"relationship_types": rel_type_counts},
-            )
-
             return filtered_objects
         except Exception as e:
             self.helper.connector_logger.error(
@@ -234,20 +213,11 @@ class ScoutSearchConnectorConnector:
         return True
 
     def send_bundle(self, stix_objects: list) -> str:
-        self.helper.connector_logger.info(
-            "[ScoutSearchConnector] Creating bundle",
-            {"total_objects": len(stix_objects)},
-        )
         stix_objects_bundle = self.helper.stix2_create_bundle(stix_objects)
         bundles_sent = self.helper.send_stix2_bundle(
             stix_objects_bundle, cleanup_inconsistent_bundle=True
         )
-        info_msg = f"Sending {len(bundles_sent)} stix bundle(s) for worker import"
-        self.helper.connector_logger.info(
-            "[ScoutSearchConnector] Bundle sent",
-            {"bundles_sent": len(bundles_sent)},
-        )
-        return info_msg
+        return f"Sending {len(bundles_sent)} stix bundle(s) for worker import"
 
     def process_message(self, data: Dict) -> str:
         """Process enrichment message from OpenCTI"""
